@@ -1,3 +1,3 @@
 {
-  "bgColor": "#0E4AE1"
+  "bgColor": "#0EE11C"
 }
