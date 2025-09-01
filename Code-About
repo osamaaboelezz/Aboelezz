@@ -1,0 +1,234 @@
+import { useActiveBreakpoint } from "figma:react";
+import { useState, useEffect, useRef } from "react";
+import { defineProperties } from "figma:react";
+
+// Bezier curve utility function
+function bezierEasing(t, p1x, p1y, p2x, p2y) {
+  // Function to solve for t given x
+  function solveCubicBezierForT(x, p1x, p2x) {
+    // Newton-Raphson method to find t for given x
+    let t = x;
+    for (let i = 0; i < 8; i++) {
+      // Calculate the cubic bezier value for current t
+      const currentX = cubicBezier(t, 0, p1x, p2x, 1);
+      // Calculate the derivative
+      const derivative = cubicBezierDerivative(t, 0, p1x, p2x, 1);
+      // Newton-Raphson step
+      t = t - (currentX - x) / derivative;
+      if (Math.abs(currentX - x) < 0.001) break;
+    }
+    return t;
+  }
+
+  // Cubic bezier function
+  function cubicBezier(t, p0, p1, p2, p3) {
+    return (1 - t) ** 3 * p0 + 3 * (1 - t) ** 2 * t * p1 + 3 * (1 - t) * t ** 2 * p2 + t ** 3 * p3;
+  }
+
+  // Derivative of cubic bezier
+  function cubicBezierDerivative(t, p0, p1, p2, p3) {
+    return 3 * (1 - t) ** 2 * (p1 - p0) + 6 * (1 - t) * t * (p2 - p1) + 3 * t ** 2 * (p3 - p2);
+  }
+
+  // Find t value for given x (progress)
+  const tValue = solveCubicBezierForT(t, p1x, p2x);
+  // Calculate corresponding y value
+  return cubicBezier(tValue, 0, p1y, p2y, 1);
+}
+
+// Predefined easing functions
+const easingPresets = {
+  linear: { fn: (t) => t, bezier: [0, 0, 1, 1] },
+  easeIn: { fn: (t) => bezierEasing(t, 0.42, 0, 1, 1), bezier: [0.42, 0, 1, 1] },
+  easeOut: { fn: (t) => bezierEasing(t, 0, 0, 0.58, 1), bezier: [0, 0, 0.58, 1] },
+  easeInOut: { fn: (t) => bezierEasing(t, 0.42, 0, 0.58, 1), bezier: [0.42, 0, 0.58, 1] },
+  easeInBack: { fn: (t) => bezierEasing(t, 0.36, 0, 0.66, -0.56), bezier: [0.36, 0, 0.66, -0.56] },
+  easeOutBack: { fn: (t) => bezierEasing(t, 0.34, 1.56, 0.64, 1), bezier: [0.34, 1.56, 0.64, 1] },
+  easeInOutBack: { fn: (t) => bezierEasing(t, 0.68, -0.6, 0.32, 1.6), bezier: [0.68, -0.6, 0.32, 1.6] },
+};
+
+function CounterAnimationComponent({ 
+  animationDuration = 1.5, 
+  animationDelay = 0,
+  easingType = 'easeInOut',
+  mobile = false,
+  tablet = false,
+}) {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [animationStartTime, setAnimationStartTime] = useState(null);
+  const elementRef = useRef<HTMLDivElement | null>(null);
+  const requestRef = useRef<number | null>(null);
+
+  // Set up intersection observer to detect when element is visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 } // Trigger when at least 10% of the element is visible
+    );
+    
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+    
+    return () => {
+      if (elementRef.current) {
+        observer.unobserve(elementRef.current);
+      }
+    };
+  }, []);
+
+  // Start animation when element becomes visible with delay
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      const timer = setTimeout(() => {
+        setHasAnimated(true);
+        setCount(0); // Reset count
+        setAnimationStartTime(performance.now());
+      }, animationDelay * 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, hasAnimated, animationDelay]);
+
+  // Animation frame loop with bezier easing
+  useEffect(() => {
+    if (!hasAnimated || animationStartTime === null) return;
+    
+    const animate = (time) => {
+      const elapsed = time - animationStartTime;
+      const duration = animationDuration * 1000;
+      
+      if (elapsed < duration) {
+        // Calculate progress with bezier easing
+        const linearProgress = Math.min(elapsed / duration, 1);
+        const easedProgress = easingPresets[easingType].fn(linearProgress);
+        
+        // Apply eased progress to count (0 to 19)
+        const newCount = Math.min(Math.floor(easedProgress * 19), 19);
+        setCount(newCount);
+        
+        requestRef.current = requestAnimationFrame(animate);
+      } else {
+        setCount(19); // Ensure we end at exactly 19
+      }
+    };
+    
+    requestRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (requestRef.current !== null) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [hasAnimated, animationStartTime, animationDuration, easingType]);
+  
+  const formattedCount = count.toString().padStart(2, '0');
+
+  // Render appropriate component based on screen size
+  if (mobile) {
+    return (
+      <div 
+        ref={elementRef}
+        className="font-['Manrope'] font-normal leading-[0] relative size-full text-[#000000] text-[0px] text-left tracking-[-0.64px]"
+      >
+        <p className="leading-none text-[32px]">
+          <span>{`For over `}</span>
+          <span className="font-['Manrope'] tabular-nums">{`${formattedCount} `}</span>years, I've been crafting design experiences —
+          grounded in three defining qualities:
+        </p>
+      </div>
+    );
+  }
+  
+  return (
+    <div 
+      ref={elementRef}
+      className="font-['Manrope'] font-normal leading-[0] relative size-full text-[#000000] text-[0px] text-left tracking-[-0.8px]"
+    >
+      <p className="leading-none">
+        <span className="text-[40px]">{`For over `}</span>
+        <span className="text-[60px] font-['Manrope'] tabular-nums">{`${formattedCount} `}</span>
+        <span className="text-[40px]">years</span>
+        <span className="text-[40px]">
+          , I've been crafting design experiences — grounded in three defining
+          qualities:
+        </span>
+      </p>
+    </div>
+  );
+}
+
+function ForOver19YearsIveBeenCraftingDesignExperiencesGroundedInThreeDefiningQualities({ 
+  animationDuration = 1.5,
+  animationDelay = 0,
+  easingType = 'easeInOut'
+}) {
+  const { width } = useActiveBreakpoint();
+  
+  if (width < 800) {
+    return (
+      <CounterAnimationComponent
+        animationDuration={animationDuration}
+        animationDelay={animationDelay}
+        easingType={easingType}
+        mobile={true}
+      />
+    );
+  }
+  
+  if (width < 1280) {
+    return (
+      <CounterAnimationComponent
+        animationDuration={animationDuration}
+        animationDelay={animationDelay}
+        easingType={easingType}
+        tablet={true}
+      />
+    );
+  }
+  
+  return (
+    <CounterAnimationComponent
+      animationDuration={animationDuration}
+      animationDelay={animationDelay}
+      easingType={easingType}
+    />
+  );
+}
+
+defineProperties(ForOver19YearsIveBeenCraftingDesignExperiencesGroundedInThreeDefiningQualities, {
+  animationDuration: {
+    label: "Animation duration (seconds)",
+    type: "number",
+    defaultValue: 1.5
+  },
+  animationDelay: {
+    label: "Animation delay (seconds)",
+    type: "number",
+    control: "number",
+    step: 0.1,
+    min: 0,
+    defaultValue: 0
+  },
+  easingType: {
+    type: "string",
+    control: "select",
+    options: [
+      { value: "linear", label: "Linear" },
+      { value: "easeIn", label: "Ease In" },
+      { value: "easeOut", label: "Ease Out" },
+      { value: "easeInOut", label: "Ease In Out" },
+      { value: "easeInBack", label: "Ease In Back" },
+      { value: "easeOutBack", label: "Ease Out Back" },
+      { value: "easeInOutBack", label: "Ease In Out Back" },
+    ],
+    label: "Easing Type",
+    defaultValue: "easeInOut",
+  },
+});
+
+export default ForOver19YearsIveBeenCraftingDesignExperiencesGroundedInThreeDefiningQualities;
