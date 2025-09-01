@@ -1,0 +1,438 @@
+import svgPaths from './svg-9w4okstba2'
+import { useActiveBreakpoint } from 'figma:react';
+import { defineProperties } from "figma:react";
+import { useState } from 'react';
+
+interface ContactButtonsProps {
+    type?: 'phone' | 'linkedin' | 'download' | 'mail';
+    iconColor?: string;
+    isActive: boolean;
+    onActivate: () => void;
+    isMobile: boolean;
+    downloadUrl: string;
+}
+
+const baseHrefMap: Record<string, string> = {
+    mail: "mailto:osama@aboelezz.de?subject=Hello%20from%20your%20website!",
+    linkedin: "https://www.linkedin.com/in/oaboelezz",
+    phone: "tel:+4915787763653",
+};
+
+function ContactButtons({ 
+    type = "mail", 
+    iconColor = "white", 
+    isActive, 
+    onActivate,
+    isMobile,
+    downloadUrl
+}: ContactButtonsProps) {
+    const [pressed, setPressed] = useState(false);
+    
+    // Handle interaction based on device type
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+        if (isMobile) {
+            if (isActive) {
+                // Already active on mobile, let the default link action proceed
+                // (no preventDefault here)
+            } else {
+                // First click - prevent navigation, just activate to show text
+                e.preventDefault();
+                onActivate();
+            }
+        } else {
+            // On desktop, click activates the link
+            // No prevention needed as hover already handles showing text
+        }
+    };
+
+    const handleMouseDown = () => setPressed(true);
+    const handleMouseUp = () => setPressed(false);
+    const handleMouseEnter = () => !isMobile && onActivate();
+    const handleMouseLeave = () => {
+        setPressed(false);
+        // Don't deactivate on mobile to maintain the selected state
+        if (!isMobile) {
+            onActivate();
+        }
+    };
+
+    // Determine display state
+    const displayHovered = isActive ? "yes" : "no";
+    const displayPressed = pressed ? "yes" : "no";
+
+    // Responsive text size
+    const textSizeClass = isMobile ? 'text-[15px]' : 'text-[24px]';
+
+    // Reduce vertical gap between icon and label on mobile by ~10px (48px → 38px)
+    const gapClass = isMobile ? 'gap-[38px]' : 'gap-12';
+
+    // Props for link behavior
+    const commonProps = {
+        onMouseEnter: handleMouseEnter,
+        onMouseLeave: handleMouseLeave, 
+        onMouseDown: handleMouseDown, 
+        onMouseUp: handleMouseUp,
+        onClick: handleInteraction,
+    };
+    
+    // resolve href
+    const href = type === 'download' ? downloadUrl : baseHrefMap[type] ?? downloadUrl;
+    // Link properties for the a tag
+    const linkProps = {
+        href,
+        ...(type === 'linkedin' ? { target: '_blank', rel: 'noopener noreferrer' } : {})
+    };
+
+    if (type === 'phone' && displayHovered === 'no') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name={`type=phone, is hovered=no, is pressed=${displayPressed}`}>
+                <div className={`${displayPressed === 'yes' ? 'bg-[rgba(255,255,255,0.15)]' : ''} box-border content-stretch cursor-pointer flex flex-row gap-2.5 items-center justify-center p-0 relative rounded-lg shrink-0 size-[100px]`} 
+                    data-name="Button" {...commonProps}>
+                    <div className="relative shrink-0 size-12" data-name="ICN">
+                        <div className="absolute inset-[7.44%_6.64%_11.17%_11.87%]" data-name="Subtract">
+                            <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 40 40">
+                                <path d={svgPaths.p328dfe80} fill={`var(--fill-0, ${iconColor})`} id="Subtract"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'linkedin' && displayHovered === 'no') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name={`type=linkedin, is hovered=no, is pressed=${displayPressed}`}>
+                <div className={`${displayPressed === 'yes' ? 'bg-[rgba(255,255,255,0.15)]' : ''} box-border content-stretch cursor-pointer flex flex-row gap-2.5 items-center justify-center p-0 relative rounded-lg shrink-0 size-[100px]`} 
+                    data-name="Button" {...commonProps}>
+                    <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                        <div className="absolute inset-[16.79%_15.25%_16.29%_14.42%]" data-name="Subtract">
+                            <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 34 33">
+                                <g id="Subtract">
+                                    <path d={svgPaths.p25790300} fill={`var(--fill-0, ${iconColor})`}/>
+                                    <path d={svgPaths.p16851b00} fill={`var(--fill-0, ${iconColor})`}/>
+                                    <path d={svgPaths.p18da9980} fill={`var(--fill-0, ${iconColor})`}/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'download' && displayHovered === 'no') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name={`type=download, is hovered=no, is pressed=${displayPressed}`}>
+                <div className={`${displayPressed === 'yes' ? 'bg-[rgba(255,255,255,0.15)]' : ''} box-border content-stretch cursor-pointer flex flex-row gap-2.5 items-center justify-center p-0 relative rounded-lg shrink-0 size-[100px]`} 
+                    data-name="Button" {...commonProps}>
+                    <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                        <div className="absolute inset-[4.17%_20.83%]" data-name="Vector">
+                            <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 28 44">
+                                <g id="Vector">
+                                    <path d={svgPaths.p26e16680} fill={`var(--fill-0, ${iconColor})`}/>
+                                    <path d={svgPaths.p254d4000} fill={`var(--fill-0, ${iconColor})`}/>
+                                    <path d={svgPaths.p3f30a700} fill={`var(--fill-0, ${iconColor})`}/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'linkedin' && displayHovered === 'yes') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name="type=linkedin, is hovered=yes, is pressed=no">
+                <div className="box-border content-stretch flex flex-col gap-2.5 items-center justify-center p-0 relative shrink-0 w-[100px]" 
+                    data-name="Button" {...commonProps}>
+                    <div className={`box-border content-stretch flex flex-col ${gapClass} h-[100px] items-center justify-center min-w-[100px] p-0 relative rounded-lg shrink-0`}>
+                        <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                            <div className="absolute inset-[16.79%_15.25%_16.29%_14.42%]" data-name="Subtract">
+                                <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 34 33">
+                                    <g id="Subtract">
+                                        <path d={svgPaths.p25790300} fill={`var(--fill-0, ${iconColor})`}/>
+                                        <path d={svgPaths.p16851b00} fill={`var(--fill-0, ${iconColor})`}/>
+                                        <path d={svgPaths.p18da9980} fill={`var(--fill-0, ${iconColor})`}/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`font-['Manrope:Regular',_sans-serif] font-normal leading-[0] relative shrink-0 ${textSizeClass} text-center text-nowrap`} style={{color: iconColor}}>
+                        <p className="block leading-[normal] whitespace-pre">Link up</p>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'download' && displayHovered === 'yes') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name="type=download, is hovered=yes, is pressed=no">
+                <div className="box-border content-stretch flex flex-col gap-2.5 items-center justify-center p-0 relative shrink-0 w-[100px]" 
+                    data-name="Button" {...commonProps}>
+                    <div className={`box-border content-stretch flex flex-col ${gapClass} h-[100px] items-center justify-center min-w-[100px] p-0 relative rounded-lg shrink-0`}>
+                        <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                            <div className="absolute inset-[4.17%_20.83%]" data-name="Vector">
+                                <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 28 44">
+                                    <g id="Vector">
+                                        <path d={svgPaths.p26e16680} fill={`var(--fill-0, ${iconColor})`}/>
+                                        <path d={svgPaths.p254d4000} fill={`var(--fill-0, ${iconColor})`}/>
+                                        <path d={svgPaths.p3f30a700} fill={`var(--fill-0, ${iconColor})`}/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`font-['Manrope:Regular',_sans-serif] font-normal leading-[0] relative shrink-0 ${textSizeClass} text-center text-nowrap`} style={{color: iconColor}}>
+                        <p className="block leading-[normal] whitespace-pre">My story on paper</p>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'mail' && displayHovered === 'yes') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name="type=mail, is hovered=yes, is pressed=no">
+                <div className="box-border content-stretch flex flex-col gap-2.5 items-center justify-center p-0 relative shrink-0 w-[100px]" 
+                    data-name="Button" {...commonProps}>
+                    <div className={`box-border content-stretch flex flex-col ${gapClass} h-[100px] items-center justify-center min-w-[100px] p-0 relative rounded-lg shrink-0`}>
+                        <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                            <div className="absolute inset-[16.67%_4.17%]" data-name="Subtract">
+                                <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 44 32">
+                                    <g id="Subtract">
+                                        <path d={svgPaths.p17e7b900} fill={`var(--fill-0, ${iconColor})`}/>
+                                        <path d={svgPaths.p14f86680} fill={`var(--fill-0, ${iconColor})`}/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`font-['Manrope:Regular',_sans-serif] font-normal leading-[0] relative shrink-0 ${textSizeClass} text-center text-nowrap`} style={{color: iconColor}}>
+                        <p className="block leading-[normal] whitespace-pre">Drop me a line</p>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    if (type === 'phone' && displayHovered === 'yes') {
+        return (
+            <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name="type=phone, is hovered=yes, is pressed=no">
+                <div className="box-border content-stretch flex flex-col gap-2.5 items-center justify-center p-0 relative shrink-0 w-[100px]" 
+                    data-name="Button" {...commonProps}>
+                    <div className={`box-border content-stretch flex flex-col ${gapClass} h-[100px] items-center justify-center min-w-[100px] p-0 relative rounded-lg shrink-0`}>
+                        <div className="relative shrink-0 size-12" data-name="ICN">
+                            <div className="absolute inset-[7.44%_6.64%_11.17%_11.87%]" data-name="Subtract">
+                                <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 40 40">
+                                    <path d={svgPaths.p328dfe80} fill={`var(--fill-0, ${iconColor})`} id="Subtract"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`font-['Manrope:Regular',_sans-serif] font-normal leading-[0] relative shrink-0 ${textSizeClass} text-center text-nowrap`} style={{color: iconColor}}>
+                        <p className="block leading-[normal] whitespace-pre">Let's talk</p>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+    return (
+        <a {...linkProps} className="box-border content-stretch flex flex-row items-start justify-start p-0 relative size-full" data-name={`type=mail, is hovered=no, is pressed=${displayPressed}`}>
+            <div className={`${displayPressed === 'yes' ? 'bg-[rgba(255,255,255,0.15)]' : ''} box-border content-stretch cursor-pointer flex flex-row gap-2.5 items-center justify-center p-0 relative rounded-lg shrink-0 size-[100px]`} 
+                data-name="Button" {...commonProps}>
+                <div className="overflow-clip relative shrink-0 size-12" data-name="ICN">
+                    <div className="absolute inset-[16.67%_4.17%]" data-name="Subtract">
+                        <svg className="block size-full" fill="none" preserveAspectRatio="none" role="presentation" viewBox="0 0 44 32">
+                            <g id="Subtract">
+                                <path d={svgPaths.p17e7b900} fill={`var(--fill-0, ${iconColor})`}/>
+                                <path d={svgPaths.p14f86680} fill={`var(--fill-0, ${iconColor})`}/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </a>
+    );
+}
+
+// Shared component logic for handling active button state
+function useSocialButtons(isMobile: boolean) {
+    // Track which button is active
+    const [activeButton, setActiveButton] = useState<string | null>(null);
+    
+    // Handle button activation
+    const handleActivateButton = (buttonType: string) => {
+        // On mobile, clicking the same button toggles it
+        // On desktop, we just toggle active state
+        if (activeButton === buttonType) {
+            // Let the default click action happen (which opens the link)
+        } else {
+            // Activate this button, deactivate others
+            setActiveButton(buttonType);
+        }
+    };
+
+    return { activeButton, handleActivateButton };
+}
+
+function SocialLinksDesktop({ iconColor = "white", downloadUrl }: { iconColor?: string; downloadUrl: string }) {
+    const isMobile = false;
+    const { activeButton, handleActivateButton } = useSocialButtons(isMobile);
+    
+    return (
+        <nav className="box-border content-stretch cursor-pointer flex flex-row items-start justify-between p-0 relative size-full" data-name="Social links">
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    iconColor={iconColor}
+                    isActive={activeButton === "mail"} 
+                    onActivate={() => handleActivateButton("mail")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="linkedin" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "linkedin"} 
+                    onActivate={() => handleActivateButton("linkedin")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="phone" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "phone"} 
+                    onActivate={() => handleActivateButton("phone")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="download" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "download"} 
+                    onActivate={() => handleActivateButton("download")}
+                    isMobile={isMobile}
+                    downloadUrl={downloadUrl}
+                />
+            </div>
+        </nav>
+    );
+}
+
+function SocialLinksTablet({ iconColor = "white", downloadUrl }: { iconColor?: string; downloadUrl: string }) {
+    const isMobile = false;
+    const { activeButton, handleActivateButton } = useSocialButtons(isMobile);
+    
+    return (
+        <nav className="box-border content-stretch cursor-pointer flex flex-row items-start justify-between p-0 relative size-full" data-name="Social links">
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    iconColor={iconColor}
+                    isActive={activeButton === "mail"} 
+                    onActivate={() => handleActivateButton("mail")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="linkedin" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "linkedin"} 
+                    onActivate={() => handleActivateButton("linkedin")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="phone" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "phone"} 
+                    onActivate={() => handleActivateButton("phone")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="download" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "download"} 
+                    onActivate={() => handleActivateButton("download")}
+                    isMobile={isMobile}
+                    downloadUrl={downloadUrl}
+                />
+            </div>
+        </nav>
+    );
+}
+
+function SocialLinksMobile({ iconColor = "white", downloadUrl }: { iconColor?: string; downloadUrl: string }) {
+    const isMobile = true;
+    const { activeButton, handleActivateButton } = useSocialButtons(isMobile);
+    
+    return (
+        <nav className="[flex-flow:wrap] box-border content-start cursor-pointer flex gap-9 items-start justify-center p-0 relative size-full" data-name="Social links">
+            <div className="box-border content-stretch flex flex-row h-[100px] items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    iconColor={iconColor}
+                    isActive={activeButton === "mail"} 
+                    onActivate={() => handleActivateButton("mail")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row h-[143px] items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="linkedin" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "linkedin"} 
+                    onActivate={() => handleActivateButton("linkedin")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row h-[100px] items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="phone" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "phone"} 
+                    onActivate={() => handleActivateButton("phone")}
+                    isMobile={isMobile}
+                />
+            </div>
+            <div className="box-border content-stretch flex flex-row h-[143px] items-start justify-start p-0 relative shrink-0" data-name="Contact_buttons">
+                <ContactButtons 
+                    type="download" 
+                    iconColor={iconColor}
+                    isActive={activeButton === "download"} 
+                    onActivate={() => handleActivateButton("download")}
+                    isMobile={isMobile}
+                    downloadUrl={downloadUrl}
+                />
+            </div>
+        </nav>
+    );
+}
+
+function SocialLinks({ iconColor = "white", downloadUrl = "#" }) {
+    const { width } = useActiveBreakpoint();
+    if (width < 800) {
+        return <SocialLinksMobile iconColor={iconColor} downloadUrl={downloadUrl} />;
+    }
+    if (width < 1280) {
+        return <SocialLinksTablet iconColor={iconColor} downloadUrl={downloadUrl} />;
+    }
+    return <SocialLinksDesktop iconColor={iconColor} downloadUrl={downloadUrl} />;
+}
+
+defineProperties(SocialLinks, {
+    iconColor: {
+        label: "Icon color",
+        type: "string",
+        defaultValue: "white"
+    },
+    downloadUrl: {
+        label: 'CV URL',
+        type: 'string',
+        defaultValue: '#'
+    }
+});
+
+export default SocialLinks;
